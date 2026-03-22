@@ -1,0 +1,1 @@
+{\n  "TenantId": "<YOUR_TENANT_ID>",\n  "ClientId": "<YOUR_CLIENT_ID>",\n  "CertificateThumbprint": "<YOUR_CERTIFICATE_THUMBPRINT>",\n  "Note": "This file contains sensitive information. Keep it secure and do not share it publicly."\n}
