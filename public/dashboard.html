@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – BE2</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      color: #1a1a2e;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    #usernameDisplay {
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+
+    .btn-logout {
+      padding: 0.4rem 1rem;
+      background: transparent;
+      border: 1.5px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      color: #374151;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .welcome-banner {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      border-radius: 12px;
+      padding: 2rem;
+      color: #fff;
+      margin-bottom: 2rem;
+    }
+
+    .welcome-banner h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-banner p {
+      opacity: 0.85;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .stat-card .label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .stat-card .sub {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BE2 Dashboard</h1>
+    <div class="header-right">
+      <span id="usernameDisplay"></span>
+      <button type="button" class="btn-logout" id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="welcome-banner">
+      <h2 id="welcomeHeading">Welcome!</h2>
+      <p>You are signed in to your personal dashboard.</p>
+    </div>
+
+    <div class="cards-grid">
+      <div class="stat-card">
+        <div class="label">Status</div>
+        <div class="value">Active</div>
+        <div class="sub">Account in good standing</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Session</div>
+        <div class="value" id="sessionTime">—</div>
+        <div class="sub">Time since login</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Role</div>
+        <div class="value">User</div>
+        <div class="sub">Standard access level</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const startTime = Date.now();
+
+    async function loadUser() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) {
+          window.location.href = '/login';
+          return;
+        }
+        const { username } = await res.json();
+        document.getElementById('usernameDisplay').textContent = username;
+        document.getElementById('welcomeHeading').textContent = `Welcome, ${username}!`;
+      } catch {
+        window.location.href = '/login';
+      }
+    }
+
+    function updateSessionTime() {
+      const seconds = Math.floor((Date.now() - startTime) / 1000);
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      document.getElementById('sessionTime').textContent =
+        mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+    }
+
+    loadUser();
+    setInterval(updateSessionTime, 1000);
+    updateSessionTime();
+
+    let csrfToken = '';
+    fetch('/api/csrf-token').then((r) => r.json()).then((d) => { csrfToken = d.csrfToken; });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/logout', { method: 'POST', headers: { 'x-csrf-token': csrfToken } });
+      window.location.href = '/login';
+    });
+  </script>
+</body>
+</html>

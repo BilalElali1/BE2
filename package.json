@@ -1,0 +1,17 @@
+{
+  "name": "be2",
+  "version": "1.0.0",
+  "description": "User dashboard with login system",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.3.1",
+    "express-session": "^1.18.0"
+  }
+}
